@@ -5,6 +5,8 @@ const cookieParser = require('cookie-parser');
 const app = express();
 require('dotenv').config();
 
+
+
 const port = process.env.PORT || 3000
 
 /*Middle-War*/
@@ -93,13 +95,27 @@ async function run() {
 
     // Job Application Apis
     app.get('/job-application', verifyToken, async (req, res) => {
+
       const email = req.user?.email;
       if (!email) {
         return res.status(400).send({ message: 'Email not found in token' });
       }
       const query = { applicant_email: email };
       const result = await jobApplication.find(query).toArray();
-      res.send(result);
+      // res.send(result);
+      for (const application of result) {
+        console.log(application.job_id)
+        const queryOne = { _id: new ObjectId(application.job_id) }
+        const job = await jobCollection.findOne(queryOne)
+        if (job) {
+          application.title = job.title
+          application.location = job.location
+          application.company = job.company
+          application.company_logo = job.company_logo
+        }
+      }
+      res.send(result)
+
     });
 
 
@@ -109,6 +125,18 @@ async function run() {
       res.send(result)
 
     })
+
+    app.delete('/job-application/:id', async (req, res) => {
+      const id = req.params.id;
+      try {
+        const result = await jobApplication.deleteOne({ _id: new ObjectId(id) });
+        res.send(result);
+      } catch (error) {
+        console.error('Error deleting job application:', error);
+        res.status(500).send({ message: 'Failed to delete job application' });
+      }
+    });
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
