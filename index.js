@@ -54,6 +54,7 @@ async function run() {
     const jobCollection = database.collection('jobs')
     const jobApplication = database.collection('job_applications')
     const popularJobs = database.collection('popular-jobs')
+    const TopCompanies = database.collection('top-companies')
 
     //  Authentication Related API
     app.post('/jwt', async (req, res) => {
@@ -92,6 +93,16 @@ async function run() {
       const result = await jobCollection.findOne(query)
       res.send(result)
     })
+
+    /* -------Feature Company And Top Company--------- */
+    //Top Companies Job
+    app.get('/top-companies', async (req, res) => {
+      const cursor = TopCompanies.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+    
+
 
     // Job Application Apis
     app.get('/job-application', verifyToken, async (req, res) => {
