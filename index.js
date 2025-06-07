@@ -55,6 +55,7 @@ async function run() {
     const jobApplication = database.collection('job_applications')
     const popularJobs = database.collection('popular-jobs')
     const TopCompanies = database.collection('top-companies')
+    const AllCompanies = database.collection('All_Companies')
 
     //  Authentication Related API
     app.post('/jwt', async (req, res) => {
@@ -101,7 +102,13 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
-    
+
+    // All companies Job
+    app.get('/companies', async (req, res) => {
+      const cursor = await AllCompanies.find().toArray()
+      res.send(cursor)
+    })
+
 
 
     // Job Application Apis
@@ -114,6 +121,7 @@ async function run() {
       const query = { applicant_email: email };
       const result = await jobApplication.find(query).toArray();
       // res.send(result);
+      const symbol = '$';
       for (const application of result) {
         console.log(application.job_id)
         const queryOne = { _id: new ObjectId(application.job_id) }
@@ -123,6 +131,13 @@ async function run() {
           application.location = job.location
           application.company = job.company
           application.company_logo = job.company_logo
+          application.salaryRange = job.salaryRange
+          // if (job.salaryRange) {
+          //   const { min, max } = job.salaryRange;
+          //   const formattedMin = min.toLocaleString();
+          //   const formattedMax = max.toLocaleString();
+          //   application.salary = `${symbol}${formattedMin} - ${formattedMax}`;
+          // }
         }
       }
       res.send(result)
