@@ -20,6 +20,7 @@ app.use(cookieParser());
 
 const verifyToken = (req, res, next) => {
   const token = req.cookies?.token;
+  console.log(req.cookies)
   console.log('Token inside the verifyToken', token);
   if (!token) {
     return res.status(401).send({ message: 'Unauthorized Access' });
@@ -56,6 +57,7 @@ async function run() {
     const popularJobs = database.collection('popular-jobs')
     const TopCompanies = database.collection('top-companies')
     const AllCompanies = database.collection('All_Companies')
+    const bookMarks = database.collection('bookmarksCollection')
 
     //  Authentication Related API
     app.post('/jwt', async (req, res) => {
@@ -132,19 +134,12 @@ async function run() {
           application.company = job.company
           application.company_logo = job.company_logo
           application.salaryRange = job.salaryRange
-          // if (job.salaryRange) {
-          //   const { min, max } = job.salaryRange;
-          //   const formattedMin = min.toLocaleString();
-          //   const formattedMax = max.toLocaleString();
-          //   application.salary = `${symbol}${formattedMin} - ${formattedMax}`;
-          // }
+
         }
       }
       res.send(result)
 
     });
-
-
     app.post('/job-applications', async (req, res) => {
       const application = req.body;
       const result = await jobApplication.insertOne(application);
@@ -162,6 +157,44 @@ async function run() {
         res.status(500).send({ message: 'Failed to delete job application' });
       }
     });
+
+    // Bookmark API
+    
+    app.post('/bookmarks', async (req, res) => {
+      const { jobId, title, salaryRange, location, company_logo, userEmail } = req.body;
+      if (!userEmail) {
+        return res.send({ message: 'User email is required' });
+      }
+
+      const result = await bookMarks.insertOne({
+        jobId,
+        userEmail,
+        title,
+        salaryRange,
+        location,
+        company_logo,
+        createdAt: new Date()
+      });
+
+      res.send({
+        bookmarkId: result.insertedId
+      });
+
+    });
+
+    //  Get Book Mark Jobs
+
+    app.get('/bookmarks', verifyToken, async (req, res) => {
+      const { email } = req.query;
+      if (!email) {
+        return res.status(400).send({ message: 'Email parameter is required' });
+      }
+      const bookmarks = await bookMarks.find({ userEmail: email }).toArray();
+      res.send(bookmarks);
+
+    });
+
+
 
 
     // Send a ping to confirm a successful connection
