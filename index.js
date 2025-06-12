@@ -58,6 +58,8 @@ async function run() {
     const TopCompanies = database.collection('top-companies')
     const AllCompanies = database.collection('All_Companies')
     const bookMarks = database.collection('bookmarksCollection')
+    const RolesBasedJobCollection = database.collection('Roles')
+    const SponsorCompany = database.collection('Sponsor-company')
 
     //  Authentication Related API
     app.post('/jwt', async (req, res) => {
@@ -194,6 +196,17 @@ async function run() {
 
     });
 
+    // Roles Based Job Collection
+    app.get('/rolebasedjob',async(req,res)=>{
+      const query = await RolesBasedJobCollection.find().toArray()
+      res.send(query)
+    })
+
+    // Sponsor Company
+    app.get('/sponsor-company-jobs', async(req,res)=>{
+      const query = await SponsorCompany.find().toArray()
+      res.send(query)
+    })
 
 
 
