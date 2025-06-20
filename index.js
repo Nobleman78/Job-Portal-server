@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000
 
 /*Middle-War*/
 app.use(cors({
-  origin: ['https://job-portal-server-blue-sigma.vercel.app'],
+  origin: ['https://job-portal-client-rosy.vercel.app'],
   credentials: true
 }));
 app.use(express.json());
